@@ -17,7 +17,7 @@ create table if not exists ref_organization
 
 );
 
-create table ref_accounts
+create table if not exists ref_accounts
 (
     id                 uuid      default gen_random_uuid() not null
         constraint ref_accounts_pk

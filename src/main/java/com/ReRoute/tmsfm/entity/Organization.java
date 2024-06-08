@@ -4,13 +4,11 @@ import com.ReRoute.tmsfm.service.Constant;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-import lombok.Builder;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Setter
-@Getter
-@Builder(access = AccessLevel.PUBLIC)
+@Getter(AccessLevel.PUBLIC)
+@Setter(AccessLevel.PUBLIC)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Entity
@@ -46,6 +44,5 @@ public class Organization {
     private String inn;
     @Column(name = "kpp")
     private String kpp;
-
 
 }
