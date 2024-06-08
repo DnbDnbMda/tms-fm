@@ -1,0 +1,265 @@
+{
+	"info": {
+		"_postman_id": "2918b03b-54ea-4221-a668-2a53c755bffb",
+		"name": "TMS_FM",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27299899",
+		"_collection_link": "https://planetary-resonance-218121.postman.co/workspace/Team-Workspace~2a1c0256-d99f-4335-8c2f-112d8706a684/collection/27299899-2918b03b-54ea-4221-a668-2a53c755bffb?action=share&source=collection_link&creator=27299899"
+	},
+	"item": [
+		{
+			"name": "create Organization with id",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"21111111-1111-1111-1111-111111111111\",\r\n  \"parent\": null,\r\n  \"group\": false,\r\n  \"name\": \"Компания01\",\r\n  \"fullName\": \"ООО Компания01\",\r\n  \"markedOnDelete\": false,\r\n  \"inn\": \"3527935566\",\r\n  \"kpp\": \"311065368\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/organization",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"organization"
+					],
+					"query": [
+						{
+							"key": "ownerOrganization",
+							"value": "11111111-1111-1111-1111-111111111111",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create Organization without id",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"\",\r\n  \"parent\": null,\r\n  \"group\": false,\r\n  \"name\": \"Компания02\",\r\n  \"fullName\": \"ООО Компания02\",\r\n  \"markedOnDelete\": false,\r\n  \"inn\": \"9527935577\",\r\n  \"kpp\": \"911065311\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/organization",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"organization"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update Organization with fix id",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"21111111-1111-1111-1111-111111111111\",\r\n   \"changeAuthor\": \"11111111-1111-1111-1111-111111111111\",\r\n  \"parent\": null,\r\n  \"group\": false,\r\n  \"name\": \"Компания02обновление\",\r\n  \"fullName\": \"ООО Компания02Обновление\",\r\n  \"markedOnDelete\": true,\r\n  \"inn\": \"9527935500\",\r\n  \"kpp\": \"911065300\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/organization",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"organization"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update Organization without id",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"id\": \"\",\r\n   \"changeAuthor\": \"11111111-1111-1111-1111-111111111111\",\r\n  \"parent\": null,\r\n  \"group\": false,\r\n  \"name\": \"Компания02\",\r\n  \"fullName\": \"ООО Компания02\",\r\n  \"markedOnDelete\": false,\r\n  \"inn\": \"9527935577\",\r\n  \"kpp\": \"911065311\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/organization",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"organization"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get All Organization",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/organization?from=4&size=5",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"organization"
+					],
+					"query": [
+						{
+							"key": "from",
+							"value": "4"
+						},
+						{
+							"key": "size",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get Organization by Id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/organization/:organizationId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"organization",
+						":organizationId"
+					],
+					"variable": [
+						{
+							"key": "organizationId",
+							"value": "21111111-1111-1111-1111-111111111111"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "del Organization by Id",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/organization/:organizationId",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"organization",
+						":organizationId"
+					],
+					"variable": [
+						{
+							"key": "organizationId",
+							"value": "21111111-1111-1111-1111-111111111111"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
