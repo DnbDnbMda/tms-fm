@@ -1,4 +1,4 @@
-package com.ReRoute.TMS_FM;
+package com.ReRoute.tmsfm;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
