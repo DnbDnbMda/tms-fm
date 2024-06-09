@@ -1,23 +1,12 @@
-#spring:
-#  datasource:
-#    url: jdbc:postgresql://localhost:5432/logiwise
-#    username: postgres
-#    password: 148148
-#    driver-class-name: org.postgresql.Driver
-
 spring:
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/TestTms
+    url: jdbc:postgresql://localhost:5432/testtms
     username: postgres
     password: 148148
     driver-class-name: org.postgresql.Driver
-
-#spring:
-#  datasource:
-#    driver-class-name: org.h2.Driver
-#    url: jdbc:h2:~/test
-#    username: sa
-#    password:
 
 server:
   port: 8080

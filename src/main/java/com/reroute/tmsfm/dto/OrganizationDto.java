@@ -1,31 +1,29 @@
-package com.ReRoute.tmsfm.dto;
+package com.reroute.tmsfm.dto;
 
-import com.ReRoute.tmsfm.entity.Account;
-import com.ReRoute.tmsfm.entity.Organization;
-import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Builder
 @Getter
 @Setter
-@RequiredArgsConstructor
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class OrganizationDto {
 
     private UUID id;
-    private Organization parent;
+    private UUID parent;
     private Boolean group;
     private LocalDateTime createdDate;
     private LocalDateTime changedDate;
     private String name;
     private String fullName;
-    private Account createAuthor;
-    private Account changeAuthor;
+    private UUID createAuthor;
+    private UUID changeAuthor;
     private Boolean markedOnDelete;
     private String inn;
     private String kpp;
+    private UUID ownerOrganization;
 }

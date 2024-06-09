@@ -1,4 +1,4 @@
-package com.ReRoute.tmsfm.service;
+package com.reroute.tmsfm.utility;
 
 public enum AccountStatus {
     ACTIVE,
