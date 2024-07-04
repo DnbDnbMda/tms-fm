@@ -20,7 +20,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Account {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;

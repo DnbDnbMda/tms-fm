@@ -2,23 +2,24 @@ package com.reroute.tmsfm.controller;
 
 import com.reroute.tmsfm.dto.OrganizationDto;
 import com.reroute.tmsfm.service.OrganizationServiceImpl;
-import com.reroute.tmsfm.utility.NotBlankUUID;
-import com.reroute.tmsfm.utility.ValidationMarker;
+import com.reroute.tmsfm.validate.ValidationMarker;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Validated
 @RestController
@@ -60,18 +61,24 @@ public class OrganizationController {
 
     @GetMapping(value = "/organization/{organizationId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<OrganizationDto> getOrganizationById(@PathVariable("organizationId") @org.hibernate.validator.constraints.UUID UUID organizationId) {
-        log.debug("Получен запрос @GetMapping(value = \"/organization\") в контроллере getOrganizationById");
-        log.debug("organizationId в контроллере getOrganizationById: {}", organizationId);
-        return ResponseEntity.of(organizationServiceImpl.getOrganizationById(organizationId));
+    public ResponseEntity<OrganizationDto> getOrganizationById(@PathVariable("organizationId")
+                                                               @org.hibernate.validator.constraints.UUID
+                                                                       (message = "Некорректный идентификатор")
+                                                               String organizationId) {
+        log.debug("Получен запрос @GetMapping(value = \"/organization\") в контроллере getOrganizationById {}",
+                organizationId);
+        return ResponseEntity.of(organizationServiceImpl.getOrganizationById(UUID.fromString(organizationId)));
     }
 
     @DeleteMapping(value = "/organization/{organizationId}")
     @ResponseStatus(HttpStatus.OK)
     @Validated
-    public void deleteOrganizationById(@PathVariable("organizationId") @NotBlankUUID UUID organizationId) {
+    public void deleteOrganizationById(@PathVariable("organizationId")
+                                       @org.hibernate.validator.constraints.UUID
+                                               (message = "Некорректный идентификатор")
+                                       String organizationId) {
         log.debug("Получен запрос @DeleteMapping(value = \"/organization/{organizationId}\") {}", organizationId);
-        organizationServiceImpl.deleteOrganizationById(organizationId);
+        organizationServiceImpl.deleteOrganizationById(UUID.fromString(organizationId));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -80,6 +87,32 @@ public class OrganizationController {
         for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
             messages.add(violation.getPropertyPath() + ": " + violation.getMessage());
         }
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST);
+        body.put("errors", messages);
+        log.error(body.toString());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        List<String> messages = new ArrayList<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            messages.add(fieldError.getField() + ": " + fieldError.getDefaultMessage());
+        }
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST);
+        body.put("errors", messages);
+        log.error(body.toString());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        List<String> messages = new ArrayList<>();
+        messages.add(ex.getMessage());
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.BAD_REQUEST);

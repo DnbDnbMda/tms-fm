@@ -1,4 +1,4 @@
-package com.reroute.tmsfm.utility;
+package com.reroute.tmsfm.validate;
 
 public interface ValidationMarker {
 

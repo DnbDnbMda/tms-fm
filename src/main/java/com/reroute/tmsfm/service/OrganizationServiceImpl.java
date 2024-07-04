@@ -9,6 +9,7 @@ import com.reroute.tmsfm.exception.OrganizationWithSpecifiedIdAlreadyExists;
 import com.reroute.tmsfm.mapper.OrganizationMapperImpl;
 import com.reroute.tmsfm.repository.AccountRepository;
 import com.reroute.tmsfm.repository.OrganizationRepository;
+import com.reroute.tmsfm.utility.Constant;
 import com.reroute.tmsfm.utility.PageConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ import static com.reroute.tmsfm.utility.Constant.ADMIN_ACCOUNT_UUID;
 @Slf4j
 @Service
 @Data
+@Component
 public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationMapperImpl organizationMapper;
@@ -42,11 +45,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional
     public Optional<OrganizationDto> createOrganization(OrganizationDto organizationDto) {
-        if (!checkOrganizationDtoNull(organizationDto)) {
-            if (organizationDto.getId() != null && organizationRepository.existsById(organizationDto.getId())) {
+        if (checkOrganizationDtoNull(organizationDto)) {
+            if (organizationDto.getId() != null && organizationRepository.existsById(UUID.fromString(organizationDto.getId()))) {
                 log.error("Организация с идентификатором {} уже существует", organizationDto.getId());
                 throw new OrganizationWithSpecifiedIdAlreadyExists(HttpStatus.BAD_REQUEST,
-                        "Организация с идентификатором " + organizationDto.getId() + "уже существует");
+                        "Организация с идентификатором: " + organizationDto.getId() + " уже существует");
+            } else if (organizationDto.getId() == null) {
+                organizationDto.setId(UUID.randomUUID().toString());
             }
         }
 
@@ -78,15 +83,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         Optional<Account> createAuthor;
         Optional<Account> changeAuthor;
 
-        if (!checkOrganizationDtoNull(organizationDto)
+        if (checkOrganizationDtoNull(organizationDto)
                 && organizationDto.getId() != null
-                && !organizationRepository.existsById(organizationDto.getId())) {
+                && !organizationRepository.existsById(UUID.fromString(organizationDto.getId()))) {
             log.error("Организация с идентификатором {} не существует", organizationDto.getId());
             throw new OrganizationNotFoundException(HttpStatus.BAD_REQUEST,
                     "Организация с идентификатором " + organizationDto.getId() + "не существует");
         }
 
-        if (organizationDto.getId() != null && organizationRepository.existsById(organizationDto.getId())) {
+        if (organizationDto.getId() != null && organizationRepository.existsById(UUID
+                .fromString(organizationDto.getId()))) {
             organizationForUpdate = getOrganizationForUpdateByUuid(organizationDto);
             parentOrganization = getParentOrganizationByUuid(organizationDto);
             ownerOrganization = getOwnerOrganizationByUuid(organizationDto);
@@ -118,7 +124,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             } else {
                 log.error("По указанному идентификатору {} организация не найдена!", organisationId);
                 throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND, "По указанному идентификатору = "
-                        + organisationId.toString() + " организация не найдена");
+                        + organisationId + " организация не найдена");
             }
         } else {
             log.error("Идентификатор организации = null. Запрос не выполнен.");
@@ -130,16 +136,21 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public void deleteOrganizationById(UUID organisationId) {
         if (organisationId != null) {
-            Organization foundOrganization = organizationRepository.findById(organisationId).orElse(null);
-            log.info("По указанному ID={} найдена организация {}", organisationId, foundOrganization);
-            if (foundOrganization != null) {
-                organizationRepository.delete(foundOrganization);
+            Optional<Organization> foundOrganization = organizationRepository.findById(organisationId);
+            if (foundOrganization.isPresent()) {
+                log.debug("По указанному ID={} найдена организация {} для удаления", organisationId,
+                        foundOrganization.get());
+                organizationRepository.delete(foundOrganization.get());
                 log.info("Удалена организация по указанному Id {}", organisationId);
             } else {
-                log.info("По указанному ID организация не найдена! Удаление не выполнено");
+                log.error("По указанному ID организация не найдена! Удаление не выполнено");
+                throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND,
+                        "По указанному ID организация не найдена! Удаление не выполнено");
             }
         } else {
-            log.info("organisationId == null. Удаление не выполнено.");
+            log.error("organisationId == null. Удаление не выполнено.");
+            throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND,
+                    "organisationId == null. Удаление не выполнено.");
         }
     }
 
@@ -161,21 +172,30 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (organizationDto.getParent() == null) {
                 return Optional.empty();
             } else {
-                return organizationRepository.findById(organizationDto.getParent());
+                return organizationRepository.findById(UUID.fromString(organizationDto.getParent()));
             }
         }
         return Optional.empty();
     }
 
     public Optional<Organization> getOwnerOrganizationByUuid(OrganizationDto organizationDto) {
-        if (organizationDto != null) {
+        if (organizationDto == null) {
+            log.error("Не получен DTO организации владельца");
+            throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND, "Не получен DTO организации владельца");
+        } else {
             if (organizationDto.getOwnerOrganization() == null) {
-                return Optional.empty();
+                organizationDto.setOwnerOrganization(Constant.ADMIN_ORGANIZATION_UUID.toString());
+            }
+            Optional<Organization> findOrganization = organizationRepository
+                    .findById(UUID.fromString(organizationDto.getOwnerOrganization()));
+            if (findOrganization.isPresent()) {
+                return findOrganization;
             } else {
-                return organizationRepository.findById(organizationDto.getOwnerOrganization());
+                log.error("По указанному идентификатору не найдена организация владелец");
+                throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND,
+                        "По указанному идентификатору не найдена организация владелец");
             }
         }
-        return Optional.empty();
     }
 
     public Optional<Account> getChangeAuthorByUuid(OrganizationDto organizationDto) {
@@ -183,7 +203,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (organizationDto.getChangeAuthor() == null) {
                 return Optional.empty();
             } else {
-                return accountRepository.findById(organizationDto.getChangeAuthor());
+                return accountRepository.findById(UUID.fromString(organizationDto.getChangeAuthor()));
             }
         }
         return Optional.empty();
@@ -193,7 +213,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (organizationDto.getCreateAuthor() == null) {
             return accountRepository.findById(ADMIN_ACCOUNT_UUID);
         } else {
-            return accountRepository.findById(organizationDto.getCreateAuthor());
+            return accountRepository.findById(UUID.fromString(organizationDto.getCreateAuthor()));
         }
     }
 
@@ -202,16 +222,16 @@ public class OrganizationServiceImpl implements OrganizationService {
             if (organizationDto.getId() == null) {
                 return Optional.empty();
             } else {
-                return organizationRepository.findById(organizationDto.getId());
+                return organizationRepository.findById(UUID.fromString(organizationDto.getId()));
             }
         }
         return Optional.empty();
     }
 
     public boolean checkOrganizationDtoNull(OrganizationDto organizationDto) {
-        if (organizationDto != null) {
+        if (organizationDto == null) {
             log.info("Полученный organizationDto равен null");
             throw new OrganizationDtoBodyIsNull(HttpStatus.BAD_REQUEST, "Полученный organizationDto равен null");
-        } else return false;
+        } else return true;
     }
 }

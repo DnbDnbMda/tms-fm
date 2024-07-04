@@ -21,7 +21,6 @@ import java.util.UUID;
 public class Organization {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent")

@@ -7,8 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import java.util.UUID;
-
 @Mapper(componentModel = "spring")
 public interface OrganizationMapper {
 
@@ -31,10 +29,10 @@ public interface OrganizationMapper {
                                 Account authorCreatedDto);
 
 
-    @Mapping(target = "ownerOrganization", expression = "java(Utils.getUuidOwnerOrganization(organization))")
-    @Mapping(target = "createAuthor", expression = "java(Utils.getUuidCreateAuthor(organization))")
-    @Mapping(target = "parent", expression = "java(Utils.getUuidParentOrganization(organization))")
-    @Mapping(target = "changeAuthor", expression = "java(Utils.getUuidChangeAuthor(organization))")
+    @Mapping(target = "ownerOrganization", expression = "java(Utils.getStrIdOwnerOrganization(organization))")
+    @Mapping(target = "createAuthor", expression = "java(Utils.getStrIdCreateAuthor(organization))")
+    @Mapping(target = "parent", expression = "java(Utils.getStrIdParentOrganization(organization))")
+    @Mapping(target = "changeAuthor", expression = "java(Utils.getStrIdChangeAuthor(organization))")
     OrganizationDto toOrganizationDto(Organization organization);
 
     @Mapping(target = "id", ignore = true)
@@ -57,25 +55,25 @@ public interface OrganizationMapper {
                                     Account authorChangeDto,
                                     @MappingTarget Organization organization);
 
-    public class Utils {
+    class Utils {
         private Utils() {
 
         }
 
-        public static UUID getUuidOwnerOrganization(Organization source) {
-            return source.getOwnerOrganization() == null ? null : source.getOwnerOrganization().getId();
+        public static String getStrIdOwnerOrganization(Organization source) {
+            return source.getOwnerOrganization() == null ? null : source.getOwnerOrganization().getId().toString();
         }
 
-        public static UUID getUuidParentOrganization(Organization source) {
-            return source.getParent() == null ? null : source.getParent().getId();
+        public static String getStrIdParentOrganization(Organization source) {
+            return source.getParent() == null ? null : source.getParent().getId().toString();
         }
 
-        public static UUID getUuidCreateAuthor(Organization source) {
-            return source.getCreateAuthor() == null ? null : source.getCreateAuthor().getId();
+        public static String getStrIdCreateAuthor(Organization source) {
+            return source.getCreateAuthor() == null ? null : source.getCreateAuthor().getId().toString();
         }
 
-        public static UUID getUuidChangeAuthor(Organization source) {
-            return source.getChangeAuthor() == null ? null : source.getChangeAuthor().getId();
+        public static String getStrIdChangeAuthor(Organization source) {
+            return source.getChangeAuthor() == null ? null : source.getChangeAuthor().getId().toString();
         }
     }
 }
