@@ -37,7 +37,7 @@ public class OrganizationController {
     @Validated({ValidationMarker.OnCreate.class})
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<OrganizationDto> createOrganization(@Valid @RequestBody OrganizationDto organizationDto) {
-        log.debug("Получен запрос @PostMapping(value = \"/organization\"), {}", organizationDto);
+        log.debug("POST /organization: {}", organizationDto);
         return ResponseEntity.of(organizationServiceImpl.createOrganization(organizationDto));
     }
 
@@ -45,18 +45,25 @@ public class OrganizationController {
     @ResponseStatus(HttpStatus.OK)
     @Validated({ValidationMarker.OnUpdate.class})
     public ResponseEntity<OrganizationDto> updateOrganization(@Valid @RequestBody OrganizationDto organizationDto) {
-        log.debug("Получен запрос @PatchMapping(value = \"/organization\") {}", organizationDto);
+        log.debug("PUT /organization: {}", organizationDto);
         return ResponseEntity.of(organizationServiceImpl.updateOrganization(organizationDto));
+    }
+
+    @GetMapping(value = "/organization/all")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<OrganizationDto>> getAllOrganizations() {
+        log.debug("GET /organization/all");
+        return ResponseEntity.of(organizationServiceImpl.getAllOrganizations());
     }
 
     @GetMapping(value = "/organization")
     @ResponseStatus(HttpStatus.OK)
     @Validated
-    public List<OrganizationDto> getAllOrganizations(@RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                                     @RequestParam(defaultValue = "10") @Positive Integer size) {
-        log.debug("Получен запрос @GetMapping(value = \"/organization\")");
-        log.debug("Значения параметров from={}, size={}", from, size);
-        return organizationServiceImpl.getAllOrganizations(from, size);
+    public ResponseEntity<List<OrganizationDto>> getAllOrganizationsPages(
+            @RequestParam(defaultValue = "0") @PositiveOrZero Integer pageNumber,
+            @RequestParam(defaultValue = "10") @Positive Integer pageSize) {
+        log.debug("GET /organization from={}, size={}", pageNumber, pageSize);
+        return ResponseEntity.of(organizationServiceImpl.getAllOrganizationsPages(pageNumber, pageSize));
     }
 
     @GetMapping(value = "/organization/{organizationId}")
@@ -65,8 +72,7 @@ public class OrganizationController {
                                                                @org.hibernate.validator.constraints.UUID
                                                                        (message = "Некорректный идентификатор")
                                                                String organizationId) {
-        log.debug("Получен запрос @GetMapping(value = \"/organization\") в контроллере getOrganizationById {}",
-                organizationId);
+        log.debug("GET /organization {}", organizationId);
         return ResponseEntity.of(organizationServiceImpl.getOrganizationById(UUID.fromString(organizationId)));
     }
 
@@ -77,7 +83,7 @@ public class OrganizationController {
                                        @org.hibernate.validator.constraints.UUID
                                                (message = "Некорректный идентификатор")
                                        String organizationId) {
-        log.debug("Получен запрос @DeleteMapping(value = \"/organization/{organizationId}\") {}", organizationId);
+        log.debug("DELETE /organization/{organizationId} {}", organizationId);
         organizationServiceImpl.deleteOrganizationById(UUID.fromString(organizationId));
     }
 

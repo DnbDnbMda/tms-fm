@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 
 public class OrganizationNotFoundException extends ResponseStatusException {
-
     public OrganizationNotFoundException(HttpStatusCode status) {
         super(status);
     }

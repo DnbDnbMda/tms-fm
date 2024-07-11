@@ -5,11 +5,10 @@ import lombok.*;
 import java.util.UUID;
 
 @Builder
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Data
 public class AccountDto {
     private UUID id;
 }

@@ -1,14 +1,13 @@
 package com.reroute.tmsfm.entity;
 
 
-import com.reroute.tmsfm.utility.AccountStatus;
+import com.reroute.tmsfm.enums.AccountStatus;
 import com.reroute.tmsfm.utility.Constant;
 import jakarta.persistence.*;
 import lombok.*;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,8 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Getter
-@Setter
+@Data
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,7 +31,7 @@ public class Account {
     private String email;
     @Column(name = "birthday")
     @DateTimeFormat(pattern = Constant.DATE_FORMAT)
-    private LocalDate birthday;
+    private LocalDateTime birthday;
     @Column(name = "phone")
     private String phone;
     @Column(name = "created_at")
@@ -42,15 +40,6 @@ public class Account {
     @DateTimeFormat(pattern = Constant.DATE_TIME_FORMAT)
     @Column(name = "updated_at")
     private LocalDateTime changedDate;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id")
-    private Account author;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "change_id")
-    private Account authorOfChange;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_organization")
-    private Organization organization;
     @Column(name = "login")
     private String login;
     @Column(name = "password")
@@ -60,9 +49,6 @@ public class Account {
     private AccountStatus status;
     @Column(name = "is_marked_deletion")
     private Boolean markedOnDelete;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent")
-    private Account parent;
     @Column(name = "is_group")
     private Boolean group;
 }
