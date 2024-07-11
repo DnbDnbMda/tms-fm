@@ -13,7 +13,9 @@ public interface OrganizationService {
 
     void deleteOrganizationById(UUID organisationId);
 
-    List<OrganizationDto> getAllOrganizations(Integer from, Integer size);
+    Optional<List<OrganizationDto>> getAllOrganizationsPages(Integer from, Integer size);
+
+    Optional<List<OrganizationDto>> getAllOrganizations();
 
     Optional<OrganizationDto> getOrganizationById(UUID organisationId);
 }

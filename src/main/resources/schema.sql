@@ -22,27 +22,26 @@ create table if not exists ref_organization
 
 create table if not exists ref_accounts
 (
-    id                 uuid                        not null
+    id                 uuid                                                  not null
         constraint ref_accounts_pk
             primary key,
-    firstname          varchar(50)                 not null,
+    firstname          varchar(50)                                           not null,
     middlename         varchar(50),
     lastname           varchar(50),
     email              varchar(100),
     birthday           date,
     phone              varchar(25),
-    author_id          uuid                        not null,
     created_at         TIMESTAMP WITHOUT TIME ZONE default CURRENT_TIMESTAMP not null,
     updated_at         TIMESTAMP WITHOUT TIME ZONE default CURRENT_TIMESTAMP,
     author_id          uuid                                                  not null,
     change_id          uuid,
-    status             varchar(50)                 not null,
-    is_group           boolean                     not null,
+    status             varchar(50)                                           not null,
+    is_group           boolean                                               not null,
     login              varchar(50),
     password           varchar(50),
-    is_marked_deletion boolean                     not null,
+    is_marked_deletion boolean                                               not null,
     parent             uuid,
-    owner_organization uuid                        not null
+    owner_organization uuid                                                  not null
 );
 
 alter table ref_accounts
@@ -60,6 +59,14 @@ INSERT INTO public.ref_accounts (id, firstname, middlename, lastname, email, bir
                                  created_at, updated_at, author_id, change_id,
                                  status, is_marked_deletion, parent, owner_organization, is_group)
 VALUES ('11111111-1111-1111-1111-111111111111', 'admin', 'admin', 'admin', 'admin@yandex.ru',
+        '2024-06-08', '+79379377979', '2024-06-08 12:08:00.000000', '2024-06-08 12:08:02.000000',
+        '11111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111',
+        'ACTIVE', false, null, '11111111-1111-1111-1111-111111111111', false);
+
+INSERT INTO public.ref_accounts (id, firstname, middlename, lastname, email, birthday, phone,
+                                 created_at, updated_at, author_id, change_id,
+                                 status, is_marked_deletion, parent, owner_organization, is_group)
+VALUES ('21111111-1111-1111-1111-111111111111', 'admin2', 'admin2', 'admin2', 'admin@yandex.ru',
         '2024-06-08', '+79379377979', '2024-06-08 12:08:00.000000', '2024-06-08 12:08:02.000000',
         '11111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111',
         'ACTIVE', false, null, '11111111-1111-1111-1111-111111111111', false);

@@ -49,14 +49,22 @@ public class OrganizationController {
         return ResponseEntity.of(organizationServiceImpl.updateOrganization(organizationDto));
     }
 
+    @GetMapping(value = "/organization/all")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<OrganizationDto>> getAllOrganizations() {
+        log.debug("Получен запрос @GetMapping(value = \"/organization/all\")");
+        return ResponseEntity.of(organizationServiceImpl.getAllOrganizations());
+    }
+
     @GetMapping(value = "/organization")
     @ResponseStatus(HttpStatus.OK)
     @Validated
-    public List<OrganizationDto> getAllOrganizations(@RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                                     @RequestParam(defaultValue = "10") @Positive Integer size) {
+    public ResponseEntity<List<OrganizationDto>> getAllOrganizationsPages(
+            @RequestParam(defaultValue = "0") @PositiveOrZero Integer pageNumber,
+            @RequestParam(defaultValue = "10") @Positive Integer pageSize) {
         log.debug("Получен запрос @GetMapping(value = \"/organization\")");
-        log.debug("Значения параметров from={}, size={}", from, size);
-        return organizationServiceImpl.getAllOrganizations(from, size);
+        log.debug("Значения параметров from={}, size={}", pageNumber, pageSize);
+        return ResponseEntity.of(organizationServiceImpl.getAllOrganizationsPages(pageNumber, pageSize));
     }
 
     @GetMapping(value = "/organization/{organizationId}")

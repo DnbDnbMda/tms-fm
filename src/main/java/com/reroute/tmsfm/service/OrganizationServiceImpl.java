@@ -23,12 +23,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.reroute.tmsfm.utility.Constant.ADMIN_ACCOUNT_UUID;
 
 @Slf4j
 @Service
@@ -61,9 +57,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organizationDto.setCreatedDate(LocalDateTime.now());
         organizationDto.setChangedDate(null);
-        parentOrganization = getParentOrganizationByUuid(organizationDto);
-        ownerOrganization = getOwnerOrganizationByUuid(organizationDto);
-        createAuthor = getCreateAuthorByUuid(organizationDto);
+
+        if (organizationDto.getParent() != null) {
+            parentOrganization = getParentOrganizationByUuid(UUID.fromString(organizationDto.getParent()));
+        } else parentOrganization = getParentOrganizationByUuid(null);
+
+        if (organizationDto.getOwnerOrganization() != null) {
+            ownerOrganization = getOwnerOrganizationByUuid(UUID.fromString(organizationDto.getOwnerOrganization()));
+        } else ownerOrganization = getOwnerOrganizationByUuid(null);
+
+        if (organizationDto.getCreateAuthor() != null) {
+            createAuthor = getCreateAuthorByUuid(UUID.fromString(organizationDto.getCreateAuthor()));
+        } else createAuthor = getCreateAuthorByUuid(null);
+
         log.debug("Подготовлен organizationDto для передачи в mapper {}", organizationDto);
         Organization organization = organizationMapper.toOrganization(organizationDto,
                 ownerOrganization.orElse(null),
@@ -93,11 +99,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if (organizationDto.getId() != null && organizationRepository.existsById(UUID
                 .fromString(organizationDto.getId()))) {
-            organizationForUpdate = getOrganizationForUpdateByUuid(organizationDto);
-            parentOrganization = getParentOrganizationByUuid(organizationDto);
-            ownerOrganization = getOwnerOrganizationByUuid(organizationDto);
-            createAuthor = getCreateAuthorByUuid(organizationDto);
-            changeAuthor = getChangeAuthorByUuid(organizationDto);
+
+            organizationForUpdate = getOrganizationByUuid(
+                    organizationDto.getId() != null ?
+                            UUID.fromString(organizationDto.getId()) : null);
+
+            parentOrganization = getParentOrganizationByUuid(
+                    organizationDto.getParent() != null ?
+                            UUID.fromString(organizationDto.getParent()) : null);
+
+            ownerOrganization = getOwnerOrganizationByUuid(
+                    organizationDto.getOwnerOrganization() != null ?
+                            UUID.fromString(organizationDto.getOwnerOrganization()) : null);
+
+            createAuthor = getCreateAuthorByUuid(
+                    organizationDto.getCreateAuthor() != null ?
+                            UUID.fromString(organizationDto.getCreateAuthor()) : null);
+
+            changeAuthor = getChangeAuthorByUuid(
+                    organizationDto.getChangeAuthor() != null ?
+                            UUID.fromString(organizationDto.getChangeAuthor()) : null);
+
             log.debug("Исходное состояние организации {}", organizationForUpdate.toString());
             Organization updatedOrganization = organizationMapperImpl.updateOrganization(organizationDto,
                     ownerOrganization.orElse(null),
@@ -156,7 +178,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
-    public List<OrganizationDto> getAllOrganizations(Integer from, Integer size) {
+    public Optional<List<OrganizationDto>> getAllOrganizations() {
+        List<Organization> foundOrganizations = organizationRepository.findAll();
+        List<OrganizationDto> organizationDtoList = foundOrganizations.stream()
+                .map(organizationMapper::toOrganizationDto)
+                .collect(Collectors.toList());
+        return Optional.of(organizationDtoList);
+    }
+
+    @Override
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public Optional<List<OrganizationDto>> getAllOrganizationsPages(Integer from, Integer size) {
         PageRequest pageRequest = new PageConfig(from, size, Sort.unsorted());
         Page<Organization> searchedOrganization = organizationRepository.findAll(pageRequest);
         List<OrganizationDto> organizationDtoList = searchedOrganization
@@ -164,68 +196,48 @@ public class OrganizationServiceImpl implements OrganizationService {
                 .map(organizationMapper::toOrganizationDto)
                 .collect(Collectors.toList());
         log.info("Список полученных организаций {}", organizationDtoList);
-        return organizationDtoList;
+        return Optional.of(organizationDtoList);
     }
 
-    public Optional<Organization> getParentOrganizationByUuid(OrganizationDto organizationDto) {
-        if (organizationDto != null) {
-            if (organizationDto.getParent() == null) {
-                return Optional.empty();
-            } else {
-                return organizationRepository.findById(UUID.fromString(organizationDto.getParent()));
-            }
+    public Optional<Organization> getParentOrganizationByUuid(UUID parentOrganizationId) {
+        if (parentOrganizationId == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
-    }
-
-    public Optional<Organization> getOwnerOrganizationByUuid(OrganizationDto organizationDto) {
-        if (organizationDto == null) {
-            log.error("Не получен DTO организации владельца");
-            throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND, "Не получен DTO организации владельца");
+        Optional<Organization> parentOrganization = organizationRepository.findById(parentOrganizationId);
+        if (parentOrganization.isPresent()) {
+            return parentOrganization;
         } else {
-            if (organizationDto.getOwnerOrganization() == null) {
-                organizationDto.setOwnerOrganization(Constant.ADMIN_ORGANIZATION_UUID.toString());
-            }
-            Optional<Organization> findOrganization = organizationRepository
-                    .findById(UUID.fromString(organizationDto.getOwnerOrganization()));
-            if (findOrganization.isPresent()) {
-                return findOrganization;
-            } else {
-                log.error("По указанному идентификатору не найдена организация владелец");
-                throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND,
-                        "По указанному идентификатору не найдена организация владелец");
-            }
+            log.error("По указанному идентификатору не найдена организация родитель");
+            throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND,
+                    "По указанному идентификатору не найдена организация родитель");
         }
     }
 
-    public Optional<Account> getChangeAuthorByUuid(OrganizationDto organizationDto) {
-        if (organizationDto != null) {
-            if (organizationDto.getChangeAuthor() == null) {
-                return Optional.empty();
-            } else {
-                return accountRepository.findById(UUID.fromString(organizationDto.getChangeAuthor()));
-            }
-        }
-        return Optional.empty();
-    }
-
-    public Optional<Account> getCreateAuthorByUuid(OrganizationDto organizationDto) {
-        if (organizationDto.getCreateAuthor() == null) {
-            return accountRepository.findById(ADMIN_ACCOUNT_UUID);
+    public Optional<Organization> getOwnerOrganizationByUuid(UUID ownerOrganizationUuid) {
+        UUID organizationUuid = Objects.requireNonNullElse(ownerOrganizationUuid, Constant.ADMIN_ORGANIZATION_UUID);
+        Optional<Organization> ownerOrganization = organizationRepository.findById(organizationUuid);
+        if (ownerOrganization.isPresent()) {
+            return ownerOrganization;
         } else {
-            return accountRepository.findById(UUID.fromString(organizationDto.getCreateAuthor()));
+            log.error("По указанному идентификатору не найдена организация владелец");
+            throw new OrganizationNotFoundException(HttpStatus.NOT_FOUND,
+                    "По указанному идентификатору не найдена организация владелец");
         }
     }
 
-    public Optional<Organization> getOrganizationForUpdateByUuid(OrganizationDto organizationDto) {
-        if (organizationDto != null) {
-            if (organizationDto.getId() == null) {
-                return Optional.empty();
-            } else {
-                return organizationRepository.findById(UUID.fromString(organizationDto.getId()));
-            }
-        }
-        return Optional.empty();
+    public Optional<Account> getChangeAuthorByUuid(UUID changeAuthorUuid) {
+        if (changeAuthorUuid == null) return Optional.empty();
+        return accountRepository.findById(changeAuthorUuid);
+    }
+
+    public Optional<Account> getCreateAuthorByUuid(UUID createAuthorUuid) {
+        UUID authorUuid = Objects.requireNonNullElse(createAuthorUuid, Constant.ADMIN_ORGANIZATION_UUID);
+        return accountRepository.findById(authorUuid);
+    }
+
+    public Optional<Organization> getOrganizationByUuid(UUID organizationId) {
+        UUID organizationIdForSearch = Objects.requireNonNullElse(organizationId, Constant.ADMIN_ORGANIZATION_UUID);
+        return organizationRepository.findById(organizationIdForSearch);
     }
 
     public boolean checkOrganizationDtoNull(OrganizationDto organizationDto) {
