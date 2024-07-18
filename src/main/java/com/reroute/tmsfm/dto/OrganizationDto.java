@@ -2,12 +2,13 @@ package com.reroute.tmsfm.dto;
 
 import com.reroute.tmsfm.validate.ValidationMarker;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.UUID;
 
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 @NoArgsConstructor
@@ -15,18 +16,21 @@ import java.time.LocalDateTime;
 @Data
 public class OrganizationDto {
     @NotNull(message = "Идентификатор не может быть null", groups = {ValidationMarker.OnUpdate.class})
-    @UUID(message = "Некорректный идентификатор организации")
-    private String id;
+    private UUID id;
+    @NotBlank(message = "Некорректный ИНН организации")
     private String inn;
+    @NotBlank(message = "Некорректный КПП организации")
     private String kpp;
-    @NotNull(message = "Наименование организации не может быть null",
+    @NotBlank(message = "Наименование организации не может быть null",
             groups = {ValidationMarker.OnCreate.class,
                     ValidationMarker.OnUpdate.class})
     private String name;
+    @NotBlank(message = "Наименование организации не может быть null",
+            groups = {ValidationMarker.OnCreate.class,
+                    ValidationMarker.OnUpdate.class})
     private String fullName;
-    @NotNull(message = "Признак принадлежности к группе не может быть null")
-    private Boolean group;
+    private boolean group;
     private LocalDateTime createdDate;
     private LocalDateTime changedDate;
-    private Boolean markedOnDelete;
+    private boolean markedOnDelete;
 }

@@ -6,14 +6,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+
 @Mapper(componentModel = "spring")
 public interface OrganizationMapper {
 
     @Mapping(target = "name", source = "organizationDto.name")
     @Mapping(target = "fullName", source = "organizationDto.fullName")
     @Mapping(target = "group", source = "organizationDto.group")
-    @Mapping(target = "createdDate", source = "organizationDto.createdDate")
-    @Mapping(target = "changedDate", source = "organizationDto.changedDate")
+    @Mapping(target = "createdDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "changedDate", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "id", source = "organizationDto.id")
     @Mapping(target = "markedOnDelete", source = "organizationDto.markedOnDelete")
     @Mapping(target = "inn", source = "organizationDto.inn")

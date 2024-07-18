@@ -1,21 +1,22 @@
 package com.reroute.tmsfm.service;
 
 import com.reroute.tmsfm.dto.OrganizationDto;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+@Service
 public interface OrganizationService {
-    Optional<OrganizationDto> createOrganization(OrganizationDto organizationDto);
+    OrganizationDto createOrganization(OrganizationDto organizationDto);
 
-    Optional<OrganizationDto> updateOrganization(OrganizationDto organizationDto);
+    OrganizationDto updateOrganization(OrganizationDto organizationDto);
 
     void deleteOrganizationById(UUID organisationId);
 
-    Optional<List<OrganizationDto>> getAllOrganizationsPages(Integer from, Integer size);
+    List<OrganizationDto> getAllOrganizationsPages(Integer from, Integer size);
 
-    Optional<List<OrganizationDto>> getAllOrganizations();
+    List<OrganizationDto> getAllOrganizations();
 
-    Optional<OrganizationDto> getOrganizationById(UUID organisationId);
+    OrganizationDto getOrganizationById(UUID organisationId);
 }
