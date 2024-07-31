@@ -1,4 +1,4 @@
-package com.ReRoute.TMS_FM;
+package com.reroute.tmsfm;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
