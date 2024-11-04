@@ -1,7 +1,7 @@
 package com.reroute.tmsfm.controller;
 
 import com.reroute.tmsfm.dto.OrganizationDto;
-import com.reroute.tmsfm.service.OrganizationServiceImpl;
+import com.reroute.tmsfm.service.impl.OrganizationServiceImpl;
 import com.reroute.tmsfm.validate.ValidationMarker;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;

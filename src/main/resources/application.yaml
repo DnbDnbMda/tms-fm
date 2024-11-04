@@ -7,6 +7,11 @@ spring:
     username: postgres
     password: 148148
     driver-class-name: org.postgresql.Driver
+  kafka:
+    bootstrap-servers: localhost:9092
+    topic-name: topicName
+
+
 ---
 spring:
   config:
@@ -31,10 +36,5 @@ server:
   error:
     include-message: always
 
-logging:
-  level:
-    org:
-      zolando:
-        logbook: debug
-    root: debug
+
 

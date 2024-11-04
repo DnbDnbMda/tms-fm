@@ -1,22 +1,29 @@
-package com.reroute.tmsfm.service;
+package com.reroute.tmsfm.service.impl;
 
+import com.reroute.tmsfm.dto.EventDto;
 import com.reroute.tmsfm.dto.OrganizationDto;
 import com.reroute.tmsfm.entity.Organization;
+import com.reroute.tmsfm.enums.EventType;
 import com.reroute.tmsfm.exception.OrganizationDtoBodyIsNull;
 import com.reroute.tmsfm.exception.OrganizationNotFound;
 import com.reroute.tmsfm.exception.OrganizationWithSpecifiedIdAlreadyExists;
 import com.reroute.tmsfm.mapper.OrganizationMapper;
 import com.reroute.tmsfm.repository.OrganizationRepository;
+import com.reroute.tmsfm.service.OrganizationService;
 import com.reroute.tmsfm.utility.Constant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,10 +37,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final OrganizationMapper organizationMapper;
+    private final KafkaTemplate<String, EventDto> kafkaTemplate;
+
+
+    @Value(value = "${spring.kafka.topic-name}")
+    private String topic;
 
     @Override
     @Transactional
     public OrganizationDto createOrganization(OrganizationDto organizationDto) {
+        EventDto eventDto = EventDto.builder()
+                .uuid(null)
+                .eventType(EventType.CREATE)
+                .localDateTime(LocalDateTime.now())
+                .build();
+        kafkaTemplate.send(topic, eventDto);
         if (checkOrganizationDtoNull(organizationDto)) {
             if (organizationDto.getId() != null && organizationRepository.existsById(organizationDto.getId())) {
                 log.info("Организация с идентификатором {} уже существует", organizationDto.getId());
@@ -42,6 +60,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
             Organization organization = organizationMapper.toOrganization(organizationDto);
             Organization createdOrganization = organizationRepository.save(organization);
+
             log.info("id новой организации: {}", createdOrganization.getId());
             log.debug("В БД добавлена новая организация {}", createdOrganization);
             return organizationMapper.toOrganizationDto(createdOrganization);

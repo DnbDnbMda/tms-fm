@@ -7,7 +7,7 @@ import com.reroute.tmsfm.exception.OrganizationWithSpecifiedIdAlreadyExists;
 import com.reroute.tmsfm.mapper.OrganizationMapper;
 import com.reroute.tmsfm.repository.OrganizationRepository;
 import com.reroute.tmsfm.service.OrganizationService;
-import com.reroute.tmsfm.service.OrganizationServiceImpl;
+import com.reroute.tmsfm.service.impl.OrganizationServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

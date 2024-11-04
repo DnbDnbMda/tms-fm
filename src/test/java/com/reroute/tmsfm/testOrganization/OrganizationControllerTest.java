@@ -5,7 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.reroute.tmsfm.controller.OrganizationController;
 import com.reroute.tmsfm.dto.OrganizationDto;
 import com.reroute.tmsfm.service.OrganizationService;
-import com.reroute.tmsfm.service.OrganizationServiceImpl;
+import com.reroute.tmsfm.service.impl.OrganizationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
