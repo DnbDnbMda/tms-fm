@@ -7,8 +7,6 @@ create table if not exists ref_organization
     is_group           boolean,
     created_at         TIMESTAMP WITHOUT TIME ZONE,
     changed_at         TIMESTAMP WITHOUT TIME ZONE,
-    author_id          uuid,
-    change_id          uuid,
     name               varchar(150),
     full_name          varchar(150),
     is_marked_deletion boolean,
@@ -22,7 +20,7 @@ create table if not exists ref_organization
 INSERT INTO public.ref_organization
 (id, parent, is_group, created_at, changed_at, name, full_name, is_marked_deletion,
  owner_organization, inn, kpp)
-VALUES ('21111111-1111-1111-1111-111111111111', null, false, '2024-06-08 12:05:18.000000',
+VALUES ('31111111-1111-1111-1111-111111111111', null, false, '2024-06-08 12:05:18.000000',
         '2024-06-08 12:05:21.000000', 'orgadmin', 'orgadmin', false, '11111111-1111-1111-1111-111111111111',
         '3527935566', '311065368');
 

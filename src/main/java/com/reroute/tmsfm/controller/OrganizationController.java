@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-
 @RestController
 @Slf4j
 @RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 public class OrganizationController {
 
+    @Autowired
     private final OrganizationServiceImpl organizationServiceImpl;
 
     public OrganizationController(OrganizationServiceImpl organizationServiceImpl) {
@@ -55,7 +56,8 @@ public class OrganizationController {
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer pageNumber,
             @RequestParam(defaultValue = "10") @Positive Integer pageSize) {
         log.debug("GET /organization from={}, size={}", pageNumber, pageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(organizationServiceImpl.getAllOrganizationsPages(pageNumber, pageSize));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(organizationServiceImpl.getAllOrganizationsPages(pageNumber, pageSize));
     }
 
     @GetMapping(value = "/organization/{organizationId}")

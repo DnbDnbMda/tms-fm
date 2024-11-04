@@ -6,11 +6,11 @@ import com.reroute.tmsfm.exception.OrganizationDtoBodyIsNull;
 import com.reroute.tmsfm.exception.OrganizationNotFound;
 import com.reroute.tmsfm.exception.OrganizationWithSpecifiedIdAlreadyExists;
 import com.reroute.tmsfm.mapper.OrganizationMapper;
-import com.reroute.tmsfm.repository.AccountRepository;
 import com.reroute.tmsfm.repository.OrganizationRepository;
 import com.reroute.tmsfm.utility.Constant;
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -21,13 +21,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
+
+@RequiredArgsConstructor
 @Service
-@Data
+@ComponentScan
+@Transactional(isolation = Isolation.REPEATABLE_READ)
 public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository organizationRepository;
-    private final AccountRepository accountRepository;
-    private final AccountService accountService;
     private final OrganizationMapper organizationMapper;
 
     @Override
@@ -51,44 +52,35 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional
     public OrganizationDto updateOrganization(OrganizationDto organizationDto) {
-        Optional<Organization> organizationForUpdate;
-        if (checkOrganizationDtoNull(organizationDto)
-                && organizationDto.getId() != null
+        if (!checkOrganizationDtoNull(organizationDto)) {
+            throw new OrganizationDtoBodyIsNull("Некорректный OrganizationDto для обновления");
+        }
+        if (organizationDto.getId() != null
                 && !organizationRepository.existsById(organizationDto.getId())) {
             log.info("Организация с идентификатором {} не существует", organizationDto.getId());
             throw new OrganizationNotFound("Организация с идентификатором " + organizationDto.getId() +
                     "не существует");
-        }
-
-        if (organizationDto.getId() != null
-                && organizationRepository.existsById(organizationDto.getId())) {
-            organizationForUpdate = getOrganizationByUuid(organizationDto.getId());
+        } else {
+            Organization organizationForUpdate = getOrganizationByUuid(organizationDto.getId());
             Organization updatedOrganization = organizationMapper.updateOrganization(organizationDto,
-                    organizationForUpdate
-                            .orElseThrow(() -> new OrganizationNotFound("Организация не найдена")));
+                    organizationForUpdate);
             log.info("Организация id: {} обновлена", updatedOrganization.getId());
             log.debug("Обновленное состояние организации {}", updatedOrganization);
             return organizationMapper.toOrganizationDto(updatedOrganization);
         }
-        throw new OrganizationDtoBodyIsNull("Некорректный OrganizationDto для обновления");
     }
 
     @Override
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public OrganizationDto getOrganizationById(UUID organisationId) {
         if (organisationId != null) {
-            Organization foundOrganization = organizationRepository
+            Organization foundOrganization = new Organization();
+            foundOrganization = organizationRepository
                     .findById(organisationId).orElseThrow(() -> new OrganizationNotFound("Организация не найдена"));
             log.debug("По указанному ID={} найдена организация {}", organisationId, foundOrganization);
-            if (foundOrganization != null) {
-                OrganizationDto foundOrganizationDto = organizationMapper.toOrganizationDto(foundOrganization);
-                log.debug("Сформирован foundOrganizationDto={}", foundOrganizationDto.toString());
-                return foundOrganizationDto;
-            } else {
-                log.info("По указанному идентификатору {} организация не найдена!", organisationId);
-                throw new OrganizationNotFound("По указанному идентификатору = "
-                        + organisationId + " организация не найдена");
-            }
+            OrganizationDto foundOrganizationDto = organizationMapper.toOrganizationDto(foundOrganization);
+            log.debug("Сформирован foundOrganizationDto={}", foundOrganizationDto.toString());
+            return foundOrganizationDto;
         } else {
             log.info("Идентификатор организации = null. Запрос не выполнен.");
             throw new OrganizationNotFound("Идентификатор организации = null. Запрос не выполнен.");
@@ -134,15 +126,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizationDtoList;
     }
 
-    public Optional<Organization> getOrganizationByUuid(UUID organizationId) {
+    public Organization getOrganizationByUuid(UUID organizationId) {
         UUID organizationIdForSearch = Objects.requireNonNullElse(organizationId, Constant.ADMIN_ORGANIZATION_UUID);
-        return organizationRepository.findById(organizationIdForSearch);
+        Optional<Organization> organizationOptional = organizationRepository.findById(organizationIdForSearch);
+        return organizationOptional.orElse(null);
     }
 
     public boolean checkOrganizationDtoNull(OrganizationDto organizationDto) {
-        if (organizationDto == null) {
-            log.info("Полученный organizationDto равен null");
-            throw new OrganizationDtoBodyIsNull("Полученный organizationDto равен null");
-        } else return true;
+        return organizationDto != null;
     }
 }

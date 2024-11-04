@@ -1,5 +1,6 @@
 package com.reroute.tmsfm.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.reroute.tmsfm.validate.ValidationMarker;
 
 import jakarta.validation.constraints.NotBlank;
@@ -11,8 +12,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class OrganizationDto {
     @NotNull(message = "Идентификатор не может быть null", groups = {ValidationMarker.OnUpdate.class})
@@ -30,7 +31,9 @@ public class OrganizationDto {
                     ValidationMarker.OnUpdate.class})
     private String fullName;
     private boolean group;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime changedDate;
     private boolean markedOnDelete;
 }
